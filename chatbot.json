@@ -1,0 +1,134 @@
+{
+  "name": "chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/chat",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4b478221-ad89-4732-967e-73741464d9d6",
+      "name": "Webhook",
+      "webhookId": "13bc2b2a-3d92-4f9e-b6b5-4cebe5610d6f"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "13eaa214-34da-4ad2-b4c2-f755937b519f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        624,
+        0
+      ],
+      "id": "110a5f66-aa12-436b-9f6f-d377a68cbfd2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json;\n\nlet userMessage = inputData.message || inputData.chatInput || inputData.output || \"\";\n\nconst jsonBody = {\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    { role: \"system\", content: \"Tu es un assistant utile et polyvalent.\" },\n    { role: \"user\", content: userMessage }\n  ]\n};\n\nreturn jsonBody;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b17b5ebf-dc78-4802-bbd1-52a229d3ef14",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "message": "c'est quoi django?"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "86828fe5-96d2-4c8a-a53a-c2720c2f7e80",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "07d10d82cbcf40d1cffa09a0e2842aeb96c6fd760c404dedfa2beba82a4e1818"
+  },
+  "id": "XeVOiFwK1gg7BPqE",
+  "tags": []
+}

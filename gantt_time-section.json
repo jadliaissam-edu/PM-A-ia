@@ -1,0 +1,158 @@
+{
+  "name": "gantt/time-section",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/predict",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f8b15166-5420-4cdc-b0f3-43a1e489278a",
+      "name": "Webhook",
+      "webhookId": "67332214-5c0e-4193-a8fc-2340623b7087"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json;\nreturn [{\n  json: {\n    model: \"llama-3.3-70b-versatile\",\n    messages: [\n      { role: \"system\", content: \"Tu es un assistant qui prédit la durée d’un projet en semaines, mois ou années, de façon réaliste.\" },\n      { role: \"user\", content: `Estime la durée du projet suivant : ${input.project}` }\n    ]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "fce7ea91-a8b1-4aa4-8cef-caea5b4472bc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        0
+      ],
+      "id": "db86d87c-aab2-4ccd-88f0-edd2c54aef88",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Récupère la réponse brute de Groq\nconst output = $json.choices[0].message.content; \n// Exemple : \"Le projet prendra environ 5 semaines.\"\nreturn [{\n  json: {\n    id: 1,\n    name: $json.project,   // sujet du projet\n    predicted_duration: output // texte directement renvoyé par Groq\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "95c61662-63a4-4efb-b0a1-d0b99f93e0f0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        816,
+        0
+      ],
+      "id": "1c4a5b06-75a9-4d9d-8f15-ee61577b299e",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "project": "plateforme de gestion des tickets comme clickup"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4bbfe02b-4a54-44dd-a289-6d717428348f",
+  "meta": {
+    "instanceId": "07d10d82cbcf40d1cffa09a0e2842aeb96c6fd760c404dedfa2beba82a4e1818"
+  },
+  "id": "e3HBGDCEBElGFRyo",
+  "tags": []
+}

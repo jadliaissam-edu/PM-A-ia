@@ -1,0 +1,145 @@
+{
+  "name": "automation-ticket",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/ticket",
+        "authentication": "jwtAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d762d541-cb7d-4157-9e06-67623f334159",
+      "name": "Webhook",
+      "webhookId": "3d07c431-32c1-435a-abaa-ae41fff1f592",
+      "credentials": {
+        "jwtAuth": {
+          "id": "Down8oVc3fm9KkOQ",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json;\n\nreturn [{\n  json: {\n    title: input.title,\n    details: input.description, // ⚠️ adapte selon le champ attendu par ton API\n    tag: input.tag              // \"task\" ou \"bug\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "fe4e2875-1c41-453c-aeba-e81936175c4d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/projects/projects_ticket/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearerdjango-insecure-kef#w@q8)+#_l^yem%y_5xbr-kewqbb2ky_@a41ks#ndq7^08#"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7545f1f9-0228-42dc-9161-1cbf3cdd161a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"ticket\": \"={{$json['title']}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        624,
+        0
+      ],
+      "id": "24c269be-d91d-4728-ac95-cf834928c060",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "title": "Erreur bouton sauvegarde",
+          "description": "Le bouton ne fonctionne pas sur Firefox",
+          "tag": "bug"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d122d6a7-4ca4-4bb6-9c8b-06def154ef18",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "07d10d82cbcf40d1cffa09a0e2842aeb96c6fd760c404dedfa2beba82a4e1818"
+  },
+  "id": "Nj8J85XoLjDEsMJH",
+  "tags": []
+}
